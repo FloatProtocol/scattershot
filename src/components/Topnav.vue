@@ -8,7 +8,7 @@
       This is the demo site, give it a try!
     </div>
     <nav id="topnav" class="border-bottom width-full bg-black">
-      <Container>
+      <div class="px-4">
         <div class="d-flex flex-items-center" style="height: 78px;">
           <div class="flex-auto d-flex flex-items-center">
             <router-link
@@ -19,7 +19,7 @@
               <span
                 :class="space && 'hide-sm'"
                 class="mr-1"
-                v-text="'snapshot'"
+                v-text="'signer'"
               />
             </router-link>
             <router-link
@@ -70,7 +70,7 @@
           @login="handleLogin"
         />
         <ModalAbout :open="modalAboutOpen" @close="modalAboutOpen = false" />
-      </Container>
+      </div>
     </nav>
   </Sticky>
 </template>
