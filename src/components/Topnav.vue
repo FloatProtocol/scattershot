@@ -16,6 +16,7 @@
               class="d-inline-block d-flex flex-items-center"
               style="font-size: 24px; padding-top: 4px;"
             >
+              <Icon name="signature" class="mr-2" />
               <span
                 :class="space && 'hide-sm'"
                 class="mr-1"

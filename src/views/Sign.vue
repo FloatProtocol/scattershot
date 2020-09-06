@@ -10,16 +10,21 @@
       >
         {{ c.contractName }}
       </UiButton>
-      <UiButton class="float-right width-full" style="max-width: 420px;">
+      <UiButton
+        :class="!addressIsValid && 'border-red'"
+        class="float-right width-full"
+        style="max-width: 420px;"
+      >
         <input
           v-model.trim="form.address"
+          @input="setAddress"
           type="text"
           class="input width-full"
           placeholder="0x123..."
         />
       </UiButton>
     </div>
-    <div>
+    <div v-if="contract">
       <div>
         <a
           :key="i"
@@ -48,7 +53,7 @@
               <UiButton
                 :key="i"
                 v-for="(component, i) in input.components"
-                class="width-full mb-2"
+                class="width-full mb-3"
               >
                 <input
                   type="text"
@@ -79,7 +84,7 @@
 import contracts from '@/sign/abi';
 import { Contract } from '@ethersproject/contracts';
 import { Web3Provider } from '@ethersproject/providers';
-import { getAddress } from '@ethersproject/address';
+import { getAddress, isAddress } from '@ethersproject/address';
 
 const setup = {
   CRPFactory: {
@@ -108,8 +113,8 @@ export default {
   data() {
     return {
       form: {
-        address: '0x1528F3FCc26d13F7079325Fb78D9442607781c8C',
-        contract: this.$route.query.contract || Object.keys(contracts)[0],
+        address: this.$route.query.address,
+        contract: this.$route.query.contract,
         command: this.$route.query.command,
         params: []
       },
@@ -118,6 +123,9 @@ export default {
     };
   },
   computed: {
+    addressIsValid() {
+      return !this.form.address || isAddress(this.form.address);
+    },
     contract() {
       return this.contracts[this.form.contract];
     },
@@ -127,7 +135,7 @@ export default {
           (command.type === 'function' &&
             !['view', 'pure'].includes(command.stateMutability) &&
             !this.form.command) ||
-          command.name === this.form.command
+          (command.name === this.form.command && command.type !== 'constructor')
       );
     },
     command() {
@@ -138,23 +146,37 @@ export default {
   },
   methods: {
     setContract(key) {
-      this.form.contract = key;
-      this.form.command = false;
+      this.form.command = undefined;
+      this.form.address = this.form.address ? this.form.address : undefined;
       if (key === this.form.contract) return;
+      this.form.contract = key;
       this.$router.push({
         path: this.$router.currentRoute.path,
         query: {
-          contract: key
+          contract: key,
+          address: this.form.address,
+          command: this.form.command
         }
       });
     },
-    setCommand(key) {
-      this.form.command = key;
-      if (key === this.form.command) return;
+    setAddress() {
       this.$router.push({
         path: this.$router.currentRoute.path,
         query: {
           contract: this.form.contract,
+          address: this.form.address,
+          command: this.form.command
+        }
+      });
+    },
+    setCommand(key) {
+      if (key === this.form.command) return;
+      this.form.command = key;
+      this.$router.push({
+        path: this.$router.currentRoute.path,
+        query: {
+          contract: this.form.contract,
+          address: this.form.address,
           command: key
         }
       });
