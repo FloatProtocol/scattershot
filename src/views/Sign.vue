@@ -1,18 +1,9 @@
 <template>
   <div>
-    <div class="px-4 pb-3 border-bottom">
-      <UiButton
-        :key="i"
-        v-for="(c, i) in contracts"
-        @click="setContract(i)"
-        :class="form.contract === i && 'button--active'"
-        class="mr-2 mb-2"
-      >
-        {{ c.contractName }}
-      </UiButton>
+    <div class="px-4 pb-3 border-bottom d-flex">
       <UiButton
         :class="!addressIsValid && 'border-red'"
-        class="float-right width-full"
+        class="width-full"
         style="max-width: 420px;"
       >
         <input
@@ -23,6 +14,17 @@
           placeholder="0x123..."
         />
       </UiButton>
+      <div class="flex-auto text-right">
+        <UiButton
+          :key="i"
+          v-for="(c, i) in contracts"
+          @click="setContract(i)"
+          :class="form.contract === i && 'button--active'"
+          class="mr-2 mb-2"
+        >
+          {{ startCase(c.contractName) }}
+        </UiButton>
+      </div>
     </div>
     <div v-if="contract">
       <div>
@@ -33,7 +35,7 @@
           :class="form.command === c.name && 'button--active'"
           class="px-4 py-3 border-bottom d-block"
         >
-          {{ c.name }}
+          {{ startCase(c.name) }}
         </a>
       </div>
       <form
@@ -42,24 +44,25 @@
         class="mx-auto py-6"
         style="max-width: 420px;"
       >
-        <h3 v-text="command.name" class="mb-3" />
+        <h2 v-text="startCase(command.name)" class="mb-3" />
         <div :key="i" v-for="(input, i) in command.inputs" class="mb-3">
           <div class="mb-2">
-            <h4 class="d-inline-block mr-2">{{ input.name }}</h4>
+            <h4 class="d-inline-block mr-2" v-text="startCase(input.name)"/>
             <UiLabel>{{ input.type }}</UiLabel>
           </div>
           <div>
             <div v-if="input.type === 'tuple'">
               <UiButton
                 :key="i"
-                v-for="(component, i) in input.components"
-                class="width-full mb-3"
+                v-for="(c, i) in input.components"
+                class="width-full d-flex mb-3"
               >
                 <input
                   type="text"
                   class="input width-full"
-                  :placeholder="component.name"
+                  :placeholder="startCase(c.name)"
                 />
+                <UiLabel style="margin-top: 11px;" class="mr-n2">{{ c.type }}</UiLabel>
               </UiButton>
             </div>
             <UiButton v-else class="width-full">
@@ -72,7 +75,12 @@
             </UiButton>
           </div>
         </div>
-        <UiButton type="submit" class="width-full button--submit mt-2">
+        <UiButton
+          :loading="loading"
+          :disabled="!form.address || !addressIsValid"
+          type="submit"
+          class="width-full button--submit mt-2"
+        >
           Submit
         </UiButton>
       </form>
@@ -85,6 +93,7 @@ import contracts from '@/sign/abi';
 import { Contract } from '@ethersproject/contracts';
 import { Web3Provider } from '@ethersproject/providers';
 import { getAddress, isAddress } from '@ethersproject/address';
+import startCase from 'lodash/startCase';
 
 const setup = {
   CRPFactory: {
@@ -112,6 +121,7 @@ const setup = {
 export default {
   data() {
     return {
+      loading: false,
       form: {
         address: this.$route.query.address,
         contract: this.$route.query.contract,
@@ -145,6 +155,7 @@ export default {
     }
   },
   methods: {
+    startCase,
     setContract(key) {
       this.form.command = undefined;
       this.form.address = this.form.address ? this.form.address : undefined;
@@ -153,8 +164,8 @@ export default {
       this.$router.push({
         path: this.$router.currentRoute.path,
         query: {
-          contract: key,
           address: this.form.address,
+          contract: key,
           command: this.form.command
         }
       });
@@ -163,8 +174,8 @@ export default {
       this.$router.push({
         path: this.$router.currentRoute.path,
         query: {
-          contract: this.form.contract,
           address: this.form.address,
+          contract: this.form.contract,
           command: this.form.command
         }
       });
@@ -175,13 +186,14 @@ export default {
       this.$router.push({
         path: this.$router.currentRoute.path,
         query: {
-          contract: this.form.contract,
           address: this.form.address,
+          contract: this.form.contract,
           command: key
         }
       });
     },
     async handleSubmit() {
+      this.loading = true;
       try {
         const web3 = new Web3Provider(this.$auth.provider);
         const signer = web3.getSigner();
@@ -206,6 +218,7 @@ export default {
       } catch (e) {
         console.log('Error', e);
       }
+      this.loading = false;
     }
   }
 };
