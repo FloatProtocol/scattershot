@@ -4,7 +4,7 @@
       <UiButton
         :class="!addressIsValid && 'border-red'"
         class="width-full"
-        style="max-width: 420px;"
+        style="max-width: 430px;"
       >
         <input
           v-model.trim="form.address"
@@ -27,7 +27,7 @@
       </div>
     </div>
     <div v-if="contract">
-      <div>
+      <div v-if="!form.command">
         <a
           :key="i"
           v-for="(c, i) in commands"
@@ -38,52 +38,30 @@
           {{ startCase(c.name) }}
         </a>
       </div>
-      <form
-        @submit.prevent="handleSubmit"
-        v-if="command"
-        class="mx-auto py-6"
-        style="max-width: 420px;"
-      >
-        <h2 v-text="startCase(command.name)" class="mb-3" />
-        <div :key="i" v-for="(input, i) in command.inputs" class="mb-3">
-          <div class="mb-2">
-            <h4 class="d-inline-block mr-2" v-text="startCase(input.name)"/>
-            <UiLabel>{{ input.type }}</UiLabel>
-          </div>
-          <div>
-            <div v-if="input.type === 'tuple'">
-              <UiButton
-                :key="i"
-                v-for="(c, i) in input.components"
-                class="width-full d-flex mb-3"
-              >
-                <input
-                  type="text"
-                  class="input width-full"
-                  :placeholder="startCase(c.name)"
-                />
-                <UiLabel style="margin-top: 11px;" class="mr-n2">{{ c.type }}</UiLabel>
-              </UiButton>
-            </div>
-            <UiButton v-else class="width-full">
-              <input
-                v-model.trim="form.params[i]"
-                type="text"
-                class="input width-full"
-                placeholder="0x123..."
-              />
-            </UiButton>
-          </div>
+    </div>
+    <div v-if="command" class="d-flex height-full">
+      <form @submit.prevent="handleSubmit" class="col-6 p-4">
+        <h3 v-text="startCase(command.name)" class="mb-3" />
+        <div style="max-width: 500px;">
+          <Command :command="command" v-model="form.params" />
+          <UiButton
+            :loading="loading"
+            :disabled="!form.address || !addressIsValid"
+            type="submit"
+            class="width-full button--submit mt-2"
+          >
+            Submit
+          </UiButton>
         </div>
-        <UiButton
-          :loading="loading"
-          :disabled="!form.address || !addressIsValid"
-          type="submit"
-          class="width-full button--submit mt-2"
-        >
-          Submit
-        </UiButton>
       </form>
+      <div class="col-6 p-4 bg-gray">
+        <div class="mb-3">
+          <h3 class="mb-2" v-text="'Command'" />
+          <div v-text="command.name" />
+        </div>
+        <h3 class="mb-2" v-text="'Params'" />
+        <code><pre v-text="JSON.stringify(form.params, null, 2)"/></code>
+      </div>
     </div>
   </div>
 </template>
@@ -142,10 +120,8 @@ export default {
     commands() {
       return this.contract.abi.filter(
         command =>
-          (command.type === 'function' &&
-            !['view', 'pure'].includes(command.stateMutability) &&
-            !this.form.command) ||
-          (command.name === this.form.command && command.type !== 'constructor')
+          command.type === 'function' &&
+          !['view', 'pure'].includes(command.stateMutability)
       );
     },
     command() {
