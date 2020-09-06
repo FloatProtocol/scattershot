@@ -19,56 +19,59 @@
         />
       </UiButton>
     </div>
-    <div class="px-4 py-4 border-bottom mb-4">
-      <UiButton
-        :key="i"
-        v-for="(c, i) in commands"
-        @click="setCommand(c.name)"
-        :class="form.command === c.name && 'button--active'"
-        class="mr-2 mb-2"
+    <div>
+      <div>
+        <a
+          :key="i"
+          v-for="(c, i) in commands"
+          @click="setCommand(c.name)"
+          :class="form.command === c.name && 'button--active'"
+          class="px-4 py-3 border-bottom d-block"
+        >
+          {{ c.name }}
+        </a>
+      </div>
+      <form
+        @submit.prevent="handleSubmit"
+        v-if="command"
+        class="mx-auto py-6"
+        style="max-width: 420px;"
       >
-        {{ c.name }}
-      </UiButton>
-    </div>
-    <Container>
-      <form @submit.prevent="handleSubmit" v-if="command">
-        <div class="mx-auto" style="max-width: 420px;">
-          <h3 v-text="command.name" class="mb-3" />
-          <div :key="i" v-for="(input, i) in command.inputs" class="mb-3">
-            <div class="mb-2">
-              <h4 class="d-inline-block mr-2">{{ input.name }}</h4>
-              <UiLabel>{{ input.type }}</UiLabel>
-            </div>
-            <div>
-              <div v-if="input.type === 'tuple'">
-                <UiButton
-                  :key="i"
-                  v-for="(component, i) in input.components"
-                  class="width-full mb-2"
-                >
-                  <input
-                    type="text"
-                    class="input width-full"
-                    :placeholder="component.name"
-                  />
-                </UiButton>
-              </div>
-              <UiButton v-else class="width-full">
+        <h3 v-text="command.name" class="mb-3" />
+        <div :key="i" v-for="(input, i) in command.inputs" class="mb-3">
+          <div class="mb-2">
+            <h4 class="d-inline-block mr-2">{{ input.name }}</h4>
+            <UiLabel>{{ input.type }}</UiLabel>
+          </div>
+          <div>
+            <div v-if="input.type === 'tuple'">
+              <UiButton
+                :key="i"
+                v-for="(component, i) in input.components"
+                class="width-full mb-2"
+              >
                 <input
-                  v-model.trim="form.params[i]"
                   type="text"
                   class="input width-full"
-                  placeholder="0x123..."
+                  :placeholder="component.name"
                 />
               </UiButton>
             </div>
+            <UiButton v-else class="width-full">
+              <input
+                v-model.trim="form.params[i]"
+                type="text"
+                class="input width-full"
+                placeholder="0x123..."
+              />
+            </UiButton>
           </div>
-          <UiButton type="submit" class="width-full button--submit mt-2">
-            Submit
-          </UiButton>
         </div>
+        <UiButton type="submit" class="width-full button--submit mt-2">
+          Submit
+        </UiButton>
       </form>
-    </Container>
+    </div>
   </div>
 </template>
 
@@ -121,8 +124,10 @@ export default {
     commands() {
       return this.contract.abi.filter(
         command =>
-          command.type === 'function' &&
-          !['view', 'pure'].includes(command.stateMutability)
+          (command.type === 'function' &&
+            !['view', 'pure'].includes(command.stateMutability) &&
+            !this.form.command) ||
+          command.name === this.form.command
       );
     },
     command() {
@@ -133,8 +138,9 @@ export default {
   },
   methods: {
     setContract(key) {
-      if (key === this.form.contract) return;
       this.form.contract = key;
+      this.form.command = false;
+      if (key === this.form.contract) return;
       this.$router.push({
         path: this.$router.currentRoute.path,
         query: {
@@ -143,8 +149,8 @@ export default {
       });
     },
     setCommand(key) {
-      if (key === this.form.command) return;
       this.form.command = key;
+      if (key === this.form.command) return;
       this.$router.push({
         path: this.$router.currentRoute.path,
         query: {
