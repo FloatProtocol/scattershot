@@ -5,10 +5,8 @@ import client from '@/helpers/client';
 import ipfs from '@/helpers/ipfs';
 import getProvider from '@/helpers/provider';
 import { formatProposal, formatProposals } from '@/helpers/utils';
-import { getBlockNumber, resolveContent, signMessage } from '@/helpers/web3';
-import registry from '@/helpers/registry.json';
+import { getBlockNumber, signMessage } from '@/helpers/web3';
 import { version } from '@/../package.json';
-import config from '@/helpers/config';
 
 const state = {
   init: false,
@@ -80,6 +78,10 @@ const actions = {
     commit('SET', { loading: payload });
   },
   getSpaces: async ({ commit }) => {
+    const spaces = {};
+    commit('SET', { spaces });
+    return spaces;
+    /*
     const spaces: any = await client.request('spaces');
     if (config.env !== 'master') {
       try {
@@ -99,6 +101,7 @@ const actions = {
     }
     commit('SET', { spaces });
     return spaces;
+    */
   },
   send: async ({ commit, dispatch, rootState }, { token, type, payload }) => {
     const auth = getInstance();
