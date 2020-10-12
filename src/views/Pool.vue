@@ -10,7 +10,20 @@
       <div class="col-12 col-lg-8 float-left pr-0 pr-lg-5">
         <div class="px-4 px-md-0">
           <template v-if="loaded">
-            <h1 class="mb-2">BPT</h1>
+            <h1 v-text="pool.bptSymbol" class="mb-2" />
+            <Block :slim="true" title="Pool tokens">
+              <div
+                v-for="(poolToken, key, i) in pool.poolTokens"
+                :key="key"
+                :style="i === 0 && 'border: 0 !important;'"
+                class="px-4 py-3 border-top d-flex"
+              >
+                <div class="flex-auto">
+                  <b>{{ poolToken.name }}</b> {{ poolToken.symbol }}
+                </div>
+                <div v-text="_numeral(poolToken.balanceOf)" />
+              </div>
+            </Block>
           </template>
           <template v-else>
             <div
@@ -40,17 +53,6 @@
               v-text="`${$n(pool.bpool.swapFee)}%`"
               class="float-right text-white"
             />
-          </div>
-          <div class="mb-1">
-            <b>Snapshot</b>
-            <a
-              :href="_explorer(12345, 'block')"
-              target="_blank"
-              class="float-right"
-            >
-              {{ $n(12345.789) }}
-              <Icon name="external-link" class="ml-1" />
-            </a>
           </div>
         </Block>
       </div>

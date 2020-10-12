@@ -1,5 +1,5 @@
 import { getAddress, isAddress } from '@ethersproject/address';
-import { loadBPool, loadPoolTokens } from '@/_balancer/utils';
+import { loadBPool, loadPoolTokens, getBptSymbol } from '@/_balancer/utils';
 
 export default class Pool {
   public chainId: number;
@@ -8,6 +8,7 @@ export default class Pool {
   public checksum: string;
   public bpool?: any;
   public poolTokens?: any;
+  public bptSymbol?: string;
 
   constructor(chainId: number, provider, address: string) {
     this.chainId = chainId;
@@ -24,6 +25,6 @@ export default class Pool {
       this.checksum,
       this.bpool.currentTokens
     );
-    console.log('Pool tokens', this.poolTokens);
+    this.bptSymbol = getBptSymbol(this.poolTokens);
   }
 }
