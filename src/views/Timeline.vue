@@ -8,10 +8,7 @@
         <div class="col-12 col-lg-9 float-left pl-0 pl-lg-5">
           <div class="px-4 px-md-0 mb-3 d-flex">
             <div class="flex-auto">
-              <router-link :to="{ name: 'home' }" class="text-gray">
-                <Icon name="back" size="22" class="v-align-middle" />
-                Home
-              </router-link>
+              <BackButton :to="{ name: 'home' }" text="Home" />
               <div class="d-flex flex-items-center flex-auto">
                 <h2>Timeline</h2>
               </div>

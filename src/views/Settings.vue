@@ -1,10 +1,10 @@
 <template>
   <Container :slim="true">
     <div class="px-4 px-md-0 mb-3">
-      <router-link :to="{ name: 'home' }" class="text-gray">
-        <Icon name="back" size="22" class="v-align-middle" />
-        Home
-      </router-link>
+      <BackButton
+        :to="{ name: domain ? 'home' : 'proposals' }"
+        :text="space.name"
+      />
     </div>
     <div>
       <div class="col-12 col-lg-8 float-left pr-0 pr-lg-5">
@@ -264,6 +264,9 @@ export default {
     };
   },
   computed: {
+    space() {
+      return this.app.spaces[this.key];
+    },
     validate() {
       return validateSchema(schemas.space, this.form);
     },
