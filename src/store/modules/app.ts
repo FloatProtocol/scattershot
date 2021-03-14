@@ -66,6 +66,15 @@ const mutations = {
   }
 };
 
+const didVoteFor = (vote: any, choice: number) => {
+  const payloadChoice = vote.msg.payload.choice;
+  if (Array.isArray(payloadChoice)) {
+    return payloadChoice[choice];
+  }
+
+  return payloadChoice == choice;
+}
+
 const actions = {
   init: async ({ commit, dispatch }) => {
     const auth = getInstance();
@@ -189,6 +198,9 @@ const actions = {
         ),
         getProfiles([proposal.address, ...voters])
       ]);
+      // TODO: TEMPORARY
+      scores[0][proposal.address] = 120.0;
+      // TODO: TEMPORARY
       console.timeEnd('getProposal.scores');
       console.log('Scores', scores);
 
@@ -198,6 +210,10 @@ const actions = {
       });
       proposal.profile = authorProfile;
 
+      console.log('Voters:', voters);
+
+      console.log('Votes:', votes);
+
       votes = Object.fromEntries(
         Object.entries(votes)
           .map((vote: any) => {
@@ -205,46 +221,64 @@ const actions = {
               (strategy, i) => scores[i][vote[1].address] || 0
             );
             vote[1].balance = vote[1].scores.reduce((a, b: any) => a + b, 0);
-            const choiceAllocation = Object.values(
-              vote[1].msg.payload.choice
-            ) as number[];
-            vote[1].totalAllocation = choiceAllocation.reduce(
-              (acc, allocation) => acc + allocation
-            );
+            
+            const payloadChoice = vote[1].msg.payload.choice;
+            if (payloadChoice.length) {
+              const choiceAllocation = Object.values(
+                vote[1].msg.payload.choice
+              ) as number[];
+              
+              if (choiceAllocation.length < 1)
+              console.log(choiceAllocation);
+  
+              vote[1].totalAllocation = choiceAllocation.reduce(
+                (acc, allocation) => acc + allocation
+              );
+              return vote;
+            }
+
+            vote[1].totalAllocation = 1;
             return vote;
           })
           .sort((a, b) => b[1].balance - a[1].balance)
           .filter(vote => vote[1].balance > 0)
       );
 
+      console.log('Votes: ', votes);
+
       /* Get results */
       const results = {
         totalVotes: proposal.msg.payload.choices.map((_, i) => {
+          
+          console.log(Object.values(votes).filter((v) => didVoteFor(v, i+1)));
           return Object.values(votes).filter(
-            (vote: any) =>
-              vote.msg.payload.choice[i + 1] &&
-              vote.msg.payload.choice[i + 1] > 0
+            (vote: any) => didVoteFor(vote, i + 1)
           ).length;
         }),
         totalBalances: proposal.msg.payload.choices.map((_, i) =>
           Object.values(votes)
-            .filter((vote: any) => vote.msg.payload.choice[i + 1])
+            .filter((vote: any) => didVoteFor(vote, i + 1))
             .reduce(
               (a: any, b: any) =>
-                a +
-                (b.balance * b.msg.payload.choice[i + 1]) / b.totalAllocation,
+                {
+                  const allocationWeight = Array.isArray(b.msg.payload.choice) ? b.msg.payload.choice[i + 1] : 1;
+                  const weightedBalance = b.balance * allocationWeight / b.totalAllocation;
+                  return a + weightedBalance;
+                },
               0
             )
         ),
         totalScores: proposal.msg.payload.choices.map((choice, i) =>
           space.strategies.map((strategy, sI) =>
             Object.values(votes)
-              .filter((vote: any) => vote.msg.payload.choice[i + 1])
+              .filter((vote: any) => didVoteFor(vote, i + 1))
               .reduce(
                 (a: any, b: any) =>
-                  a +
-                  (b.scores[sI] * b.msg.payload.choice[i + 1]) /
-                    b.totalAllocation,
+                  {
+                    const allocationWeight = Array.isArray(b.msg.payload.choice) ? b.msg.payload.choice[i + 1] : 1;
+                    const weightedScore = b.scores[sI] * allocationWeight / b.totalAllocation;
+                    return a + weightedScore;
+                  },
                 0
               )
           )
@@ -254,6 +288,8 @@ const actions = {
           0
         )
       };
+
+      console.log(results);
 
       commit('GET_PROPOSAL_SUCCESS');
       return { proposal, votes, results };
@@ -275,6 +311,9 @@ const actions = {
         // @ts-ignore
         blockTag
       );
+      // TODO: TEMPORARY
+      scores[0][address] = 120.0;
+      // TODO: TEMPORARY
       scores = scores.map((score: any) =>
         Object.values(score).reduce((a, b: any) => a + b, 0)
       );

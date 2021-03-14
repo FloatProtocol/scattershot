@@ -292,6 +292,7 @@ export default {
         space: this.space,
         id: this.id
       });
+
       this.proposal = proposalObj.proposal;
       this.votes = proposalObj.votes;
       this.results = proposalObj.results;
