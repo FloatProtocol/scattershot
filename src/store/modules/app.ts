@@ -146,6 +146,7 @@ const actions = {
     try {
       let proposals: any = await client.request(`${space.key}/proposals`);
       console.log('getProposals.proposals: ', proposals);
+      console.log('getProposals.space: ', space);
       if (proposals && !space.filters?.onlyMembers) {
         console.log('getProposals.getScores starting...');
         const scores: any = await getScores(
