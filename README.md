@@ -1,6 +1,6 @@
-# Snapshot
+# Scattershot
 
-Snapshot is an off-chain gasless multi-governance client with easy to verify and hard to contest results. 
+A fork of the amazing [Snapshot](snapshot.org) with the ability to do proportional votes hacked in.
 
 **[Documentation](https://docs.snapshot.org)**
 
