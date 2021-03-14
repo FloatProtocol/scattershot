@@ -49,13 +49,12 @@
             class="d-flex width-full text-left mb-2 px-2 flex-justify-between"
             :class="allocations[i + 1] && 'button--active'"
           >
-            <span
-              class="ml-4 flex-1"
-              @click="incrementChoice(i)"
-            >{{ _shorten(choice, 32) }}</span>
+            <span class="ml-4 flex-1" @click="incrementChoice(i)">{{
+              _shorten(choice, 32)
+            }}</span>
             <div class="mr-4">
-              {{ this.allocations[i + 1] ?? "0" }}
-              <small class="ml-2">{{ proportion[i + 1] ?? "0%" }}</small>
+              {{ this.allocations[i + 1] ?? '0' }}
+              <small class="ml-2">{{ proportion[i + 1] ?? '0%' }}</small>
               <span @click="decrementChoice(i)" class="p-2">
                 -
               </span>
@@ -248,18 +247,21 @@ export default {
       return primaryChoice;
     },
     proportion() {
-      const sum = Object.values(this.allocations).reduce((acc, a) => acc + a, 0);
-      
+      const sum = Object.values(this.allocations).reduce(
+        (acc, a) => acc + a,
+        0
+      );
+
       const proportions = {};
       for (const [choice, allocation] of Object.entries(this.allocations)) {
-        const prop = allocation * 100 / (sum ? sum : 1);
-        proportions[choice] = prop.toFixed(0) + "%";
+        const prop = (allocation * 100) / (sum ? sum : 1);
+        proportions[choice] = prop.toFixed(0) + '%';
       }
 
       return proportions;
     },
     hasSelected() {
-      return Object.values(this.allocations).length > 0
+      return Object.values(this.allocations).length > 0;
     },
     ts() {
       return (Date.now() / 1e3).toFixed();

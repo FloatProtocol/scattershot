@@ -5,9 +5,7 @@
     </template>
     <div class="d-flex flex-column flex-auto">
       <h4 class="m-4 mb-0 text-center">
-        {{
-          $tc('sureToVote', [options])
-        }}
+        {{ $tc('sureToVote', [options]) }}
         <br />
         {{ $t('cannotBeUndone') }}
       </h4>
@@ -92,10 +90,9 @@ export default {
       return this.space.strategies.map(strategy => strategy.params.symbol);
     },
     options() {
-      return Object
-        .entries(this.allocations)
-        .sort(([,a],[,b]) => b - a)
-        .map(([choice,]) => this.proposal.msg.payload.choices[choice - 1])
+      return Object.entries(this.allocations)
+        .sort(([, a], [, b]) => b - a)
+        .map(([choice]) => this.proposal.msg.payload.choices[choice - 1])
         .join(' > ');
     }
   },
