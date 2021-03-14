@@ -66,12 +66,15 @@ const mutations = {
   }
 };
 
+const isAllocation = (payloadChoice: any): payloadChoice is Record<number, number> => {
+  return typeof payloadChoice !== 'number';
+}
+
 const didVoteFor = (vote: any, choice: number) => {
   const payloadChoice = vote.msg.payload.choice;
-  if (Array.isArray(payloadChoice)) {
-    return payloadChoice[choice];
+  if (isAllocation(payloadChoice)) {
+    return payloadChoice[choice] && payloadChoice[choice] > 0;
   }
-
   return payloadChoice == choice;
 }
 
@@ -198,9 +201,6 @@ const actions = {
         ),
         getProfiles([proposal.address, ...voters])
       ]);
-      // TODO: TEMPORARY
-      scores[0][proposal.address] = 120.0;
-      // TODO: TEMPORARY
       console.timeEnd('getProposal.scores');
       console.log('Scores', scores);
 
@@ -223,17 +223,16 @@ const actions = {
             vote[1].balance = vote[1].scores.reduce((a, b: any) => a + b, 0);
             
             const payloadChoice = vote[1].msg.payload.choice;
-            if (payloadChoice.length) {
-              const choiceAllocation = Object.values(
+            if (isAllocation(payloadChoice)) {
+              let choiceAllocation = Object.values(
                 vote[1].msg.payload.choice
               ) as number[];
               
-              if (choiceAllocation.length < 1)
-              console.log(choiceAllocation);
-  
               vote[1].totalAllocation = choiceAllocation.reduce(
-                (acc, allocation) => acc + allocation
+                (acc, allocation) => acc + allocation, 0
               );
+              
+              console.log("totalAllocation: ", vote[1].totalAllocation);
               return vote;
             }
 
@@ -261,7 +260,7 @@ const actions = {
             .reduce(
               (a: any, b: any) =>
                 {
-                  const allocationWeight = Array.isArray(b.msg.payload.choice) ? b.msg.payload.choice[i + 1] : 1;
+                  const allocationWeight = isAllocation(b.msg.payload.choice) ? b.msg.payload.choice[i + 1] : 1;
                   const weightedBalance = b.balance * allocationWeight / b.totalAllocation;
                   return a + weightedBalance;
                 },
@@ -275,7 +274,7 @@ const actions = {
               .reduce(
                 (a: any, b: any) =>
                   {
-                    const allocationWeight = Array.isArray(b.msg.payload.choice) ? b.msg.payload.choice[i + 1] : 1;
+                    const allocationWeight = isAllocation(b.msg.payload.choice) ? b.msg.payload.choice[i + 1] : 1;
                     const weightedScore = b.scores[sI] * allocationWeight / b.totalAllocation;
                     return a + weightedScore;
                   },
@@ -311,9 +310,6 @@ const actions = {
         // @ts-ignore
         blockTag
       );
-      // TODO: TEMPORARY
-      scores[0][address] = 120.0;
-      // TODO: TEMPORARY
       scores = scores.map((score: any) =>
         Object.values(score).reduce((a, b: any) => a + b, 0)
       );
