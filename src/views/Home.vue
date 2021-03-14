@@ -69,7 +69,8 @@ import orderBy from 'lodash/orderBy';
 import spotlight from '@snapshot-labs/snapshot-spaces/spaces/spotlight.json';
 import { infiniteScroll } from '@/helpers/utils';
 
-const scattershotSpotlight = ["snapshot.floatprotocol.eth", ...spotlight];
+// Cheeky I know, but it is good to be bold.
+const scattershotSpotlight = ['snapshot.floatprotocol.eth', ...spotlight];
 
 export default {
   data() {
