@@ -4,6 +4,8 @@
       <h3>{{ $t('about') }}</h3>
     </template>
     <div class="text-center mt-4">
+      <div class="mb-2">A fork of Snapshot for the hard choices.</div>
+      <div class="text-bold">Snapshot</div>
       <a href="https://twitter.com/SnapshotLabs" target="_blank">
         <Icon size="32" name="twitter" class="mr-1 mx-2" />
       </a>
@@ -13,11 +15,24 @@
       <a href="https://t.me/snapshotlabs" target="_blank">
         <Icon size="32" name="telegram" class="mr-1 mx-2" />
       </a>
-      <a :href="`https://github.com/${pkg.repository}`" target="_blank">
+      <a :href="`https://github.com/snapshot-labs/snapshot`" target="_blank">
         <Icon size="32" name="github" class="mr-1 mx-2" />
       </a>
       <a href="https://gitcoin.co/grants/1093/snapshot" target="_blank">
         <Icon size="32" name="loveit" class="mr-1 mx-2" />
+      </a>
+      <div class="text-bold mt-2">Float Protocol</div>
+      <a href="https://twitter.com/FloatProtocol" target="_blank">
+        <Icon size="32" name="twitter" class="mr-1 mx-2" />
+      </a>
+      <a href="https://discord.gg/tmu78Rc8Fn" target="_blank">
+        <Icon size="32" name="discord" class="mr-1 mx-2" />
+      </a>
+      <a href="https://t.me/officialfloatprotocol" target="_blank">
+        <Icon size="32" name="telegram" class="mr-1 mx-2" />
+      </a>
+      <a :href="`https://github.com/${pkg.repository}`" target="_blank">
+        <Icon size="32" name="github" class="mr-1 mx-2" />
       </a>
     </div>
     <div class="m-4 p-4 mt-3 border rounded-2 text-white">

@@ -112,7 +112,9 @@ export default {
   methods: {
     ...mapActions(['login']),
     setTitle() {
-      document.title = this.space.name ? this.space.name : 'Snapshot';
+      document.title = this.space.name
+        ? this.space.name
+        : 'Scattershot (fork of Snapshot)';
     },
     async handleLogin(connector) {
       this.modalOpen = false;

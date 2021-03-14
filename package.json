@@ -79,5 +79,5 @@
     "sass-loader": "^8.0.2"
   },
   "license": "MIT",
-  "repository": "snapshot-labs/snapshot"
+  "repository": "FloatProtocol/scattershot"
 }
