@@ -170,6 +170,7 @@ const actions = {
       commit('GET_PROPOSALS_SUCCESS');
       return formatProposals(proposals);
     } catch (e) {
+      console.error(e);
       commit('GET_PROPOSALS_FAILURE', e);
     }
   },
