@@ -69,6 +69,8 @@ import orderBy from 'lodash/orderBy';
 import spotlight from '@snapshot-labs/snapshot-spaces/spaces/spotlight.json';
 import { infiniteScroll } from '@/helpers/utils';
 
+const scattershotSpotlight = ["snapshot.floatprotocol.eth", ...spotlight];
+
 export default {
   data() {
     return {
@@ -80,7 +82,7 @@ export default {
     spaces() {
       const list = Object.keys(this.app.spaces)
         .map(key => {
-          const spotlightIndex = spotlight.indexOf(key);
+          const spotlightIndex = scattershotSpotlight.indexOf(key);
           return {
             ...this.app.spaces[key],
             favorite: !!this.favoriteSpaces.favorites[key],
