@@ -205,8 +205,12 @@ const actions = {
               (strategy, i) => scores[i][vote[1].address] || 0
             );
             vote[1].balance = vote[1].scores.reduce((a, b: any) => a + b, 0);
-            const choiceAllocation = Object.values(vote[1].msg.payload.choice) as number[];
-            vote[1].totalAllocation = choiceAllocation.reduce((acc, allocation) => acc + allocation);
+            const choiceAllocation = Object.values(
+              vote[1].msg.payload.choice
+            ) as number[];
+            vote[1].totalAllocation = choiceAllocation.reduce(
+              (acc, allocation) => acc + allocation
+            );
             return vote;
           })
           .sort((a, b) => b[1].balance - a[1].balance)
@@ -215,23 +219,34 @@ const actions = {
 
       /* Get results */
       const results = {
-        totalVotes: proposal.msg.payload.choices.map(
-          (_, i) => {
-              return Object.values(votes).filter(
-                (vote: any) => vote.msg.payload.choice[i+1] && vote.msg.payload.choice[i+1] > 0
-              ).length;
-            }
-        ),
+        totalVotes: proposal.msg.payload.choices.map((_, i) => {
+          return Object.values(votes).filter(
+            (vote: any) =>
+              vote.msg.payload.choice[i + 1] &&
+              vote.msg.payload.choice[i + 1] > 0
+          ).length;
+        }),
         totalBalances: proposal.msg.payload.choices.map((_, i) =>
           Object.values(votes)
-            .filter((vote: any) => vote.msg.payload.choice[i+1])
-            .reduce((a: any, b: any) => a + b.balance * b.msg.payload.choice[i+1] / b.totalAllocation, 0)
+            .filter((vote: any) => vote.msg.payload.choice[i + 1])
+            .reduce(
+              (a: any, b: any) =>
+                a +
+                (b.balance * b.msg.payload.choice[i + 1]) / b.totalAllocation,
+              0
+            )
         ),
         totalScores: proposal.msg.payload.choices.map((choice, i) =>
           space.strategies.map((strategy, sI) =>
             Object.values(votes)
-              .filter((vote: any) => vote.msg.payload.choice[i+1])
-              .reduce((a: any, b: any) => a + b.scores[sI] * b.msg.payload.choice[i+1] / b.totalAllocation, 0)
+              .filter((vote: any) => vote.msg.payload.choice[i + 1])
+              .reduce(
+                (a: any, b: any) =>
+                  a +
+                  (b.scores[sI] * b.msg.payload.choice[i + 1]) /
+                    b.totalAllocation,
+                0
+              )
           )
         ),
         totalVotesBalances: Object.values(votes).reduce(
