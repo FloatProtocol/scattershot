@@ -1,6 +1,6 @@
 # Scattershot
 
-A fork of the amazing [Snapshot](snapshot.org) with the ability to do proportional votes hacked in.
+A fork of the amazing [Snapshot](https://snapshot.org) with the ability to do proportional votes hacked in.
 
 **[Documentation](https://docs.snapshot.org)**
 
