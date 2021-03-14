@@ -46,11 +46,20 @@
           <UiButton
             v-for="(choice, i) in payload.choices"
             :key="i"
-            @click="selectedChoice = i + 1"
-            class="d-block width-full mb-2"
-            :class="selectedChoice === i + 1 && 'button--active'"
+            class="d-flex width-full text-left mb-2 px-2 flex-justify-between"
+            :class="allocations[i + 1] && 'button--active'"
           >
-            {{ _shorten(choice, 32) }}
+            <span
+              class="ml-4 flex-1"
+              @click="incrementChoice(i)"
+            >{{ _shorten(choice, 32) }}</span>
+            <div class="mr-4">
+              {{ this.allocations[i + 1] ?? "0" }}
+              <small class="ml-2">{{ proportion[i + 1] ?? "0%" }}</small>
+              <span @click="decrementChoice(i)" class="p-2">
+                -
+              </span>
+            </div>
             <a
               v-if="payload.metadata.plugins?.aragon?.[`choice${[i + 1]}`]"
               @click="modalOpen = true"
@@ -73,7 +82,7 @@
           </UiButton>
         </div>
         <UiButton
-          :disabled="voteLoading || !selectedChoice || !web3.account"
+          :disabled="voteLoading || !hasSelected || !web3.account"
           :loading="voteLoading"
           @click="modalOpen = true"
           class="d-block width-full button--submit"
@@ -184,6 +193,7 @@
       :proposal="proposal"
       :id="id"
       :selectedChoice="selectedChoice"
+      :allocations="allocations"
       :totalScore="totalScore"
       :scores="scores"
       :snapshot="payload.snapshot"
@@ -214,7 +224,7 @@ export default {
       results: [],
       modalOpen: false,
       modalStrategiesOpen: false,
-      selectedChoice: 0,
+      allocations: {},
       totalScore: 0,
       scores: []
     };
@@ -225,6 +235,31 @@ export default {
     },
     payload() {
       return this.proposal.msg.payload;
+    },
+    selectedChoice() {
+      let maxAllocation = 0;
+      let primaryChoice = 1;
+      for (const [choice, allocation] of Object.entries(this.allocations)) {
+        if (allocation > maxAllocation) {
+          maxAllocation = allocation;
+          primaryChoice = choice;
+        }
+      }
+      return primaryChoice;
+    },
+    proportion() {
+      const sum = Object.values(this.allocations).reduce((acc, a) => acc + a, 0);
+      
+      const proportions = {};
+      for (const [choice, allocation] of Object.entries(this.allocations)) {
+        const prop = allocation * 100 / (sum ? sum : 1);
+        proportions[choice] = prop.toFixed(0) + "%";
+      }
+
+      return proportions;
+    },
+    hasSelected() {
+      return Object.values(this.allocations).length > 0
     },
     ts() {
       return (Date.now() / 1e3).toFixed();
@@ -240,6 +275,16 @@ export default {
   },
   methods: {
     ...mapActions(['getProposal', 'getPower', 'send']),
+    incrementChoice(i) {
+      const priorWeight = this.allocations[i + 1] ?? 0;
+      if (priorWeight > 98) return;
+      this.allocations[i + 1] = priorWeight + 1;
+    },
+    decrementChoice(i) {
+      let priorWeight = this.allocations[i + 1];
+      if (!priorWeight || priorWeight < 1) priorWeight = 1;
+      this.allocations[i + 1] = priorWeight - 1;
+    },
     async loadProposal() {
       const proposalObj = await this.getProposal({
         space: this.space,
