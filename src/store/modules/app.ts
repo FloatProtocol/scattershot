@@ -145,7 +145,9 @@ const actions = {
     commit('GET_PROPOSALS_REQUEST');
     try {
       let proposals: any = await client.request(`${space.key}/proposals`);
+      console.log('getProposals.proposals: ', proposals);
       if (proposals && !space.filters?.onlyMembers) {
+        console.log('getProposals.getScores starting...');
         const scores: any = await getScores(
           space.key,
           space.strategies,
@@ -163,6 +165,7 @@ const actions = {
             return [proposal[0], proposal[1]];
           })
         );
+        console.log('getProposals.withScores: ', proposals);
       }
       commit('GET_PROPOSALS_SUCCESS');
       return formatProposals(proposals);
@@ -181,6 +184,7 @@ const actions = {
         getBlockNumber(provider)
       ]);
       console.timeEnd('getProposal.data');
+      console.log(response);
       const [, , blockNumber] = response;
       let [proposal, votes]: any = response;
       proposal = formatProposal(proposal);
