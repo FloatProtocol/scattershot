@@ -147,6 +147,7 @@ const actions = {
       let proposals: any = await client.request(`${space.key}/proposals`);
       console.log('getProposals.proposals: ', proposals);
       console.log('getProposals.space: ', space);
+
       if (proposals && !space.filters?.onlyMembers) {
         console.log('getProposals.getScores starting...');
         const scores: any = await getScores(
@@ -241,7 +242,6 @@ const actions = {
                 0
               );
 
-              console.log('totalAllocation: ', vote[1].totalAllocation);
               return vote;
             }
 
@@ -257,7 +257,6 @@ const actions = {
       /* Get results */
       const results = {
         totalVotes: proposal.msg.payload.choices.map((_, i) => {
-          console.log(Object.values(votes).filter(v => didVoteFor(v, i + 1)));
           return Object.values(votes).filter((vote: any) =>
             didVoteFor(vote, i + 1)
           ).length;
