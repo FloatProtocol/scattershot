@@ -23,7 +23,7 @@
     "@primer/css": "^14.4.0",
     "@snapshot-labs/lock": "git+https://github.com/snapshot-labs/lock#master",
     "@snapshot-labs/snapshot-spaces": "git+https://github.com/snapshot-labs/snapshot-spaces#master",
-    "@snapshot-labs/snapshot.js": "git+https://github.com/snapshot-labs/snapshot.js#08bec1635348d75d0f2e416012aee47f0e023738",
+    "@snapshot-labs/snapshot.js": "git+https://github.com/FloatProtocol/snapshot.js#master",
     "@toruslabs/torus-embed": "^1.9.2",
     "@vue/cli-plugin-babel": "^4.4.0",
     "@vue/cli-plugin-eslint": "^4.4.0",
