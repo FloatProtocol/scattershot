@@ -197,6 +197,8 @@ const actions = {
       const blockTag = snapshot > blockNumber ? 'latest' : parseInt(snapshot);
 
       /* Get scores */
+      console.log('getProposal.space: ', space);
+
       console.time('getProposal.scores');
       const [scores, profiles]: any = await Promise.all([
         getScores(
@@ -298,6 +300,7 @@ const actions = {
       commit('GET_PROPOSAL_SUCCESS');
       return { proposal, votes, results };
     } catch (e) {
+      console.error(e);
       commit('GET_PROPOSAL_FAILURE', e);
     }
   },
@@ -324,6 +327,7 @@ const actions = {
         totalScore: scores.reduce((a, b: any) => a + b, 0)
       };
     } catch (e) {
+      console.error(e);
       commit('GET_POWER_FAILURE', e);
     }
   }
