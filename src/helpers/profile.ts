@@ -1,4 +1,7 @@
-import { batchSubgraphRequest, subgraphRequest } from '@snapshot-labs/snapshot.js/src/utils';
+import {
+  batchSubgraphRequest,
+  subgraphRequest
+} from '@snapshot-labs/snapshot.js/src/utils';
 
 function get3BoxProfiles(addresses) {
   return new Promise((resolove, reject) => {
@@ -26,10 +29,11 @@ function get3BoxProfiles(addresses) {
 }
 
 function lookupAddresses(addresses) {
-  const ensSubgraphUrl = 'https://api.thegraph.com/subgraphs/name/ensdomains/ens';
+  const ensSubgraphUrl =
+    'https://api.thegraph.com/subgraphs/name/ensdomains/ens';
   const batchSize = 1000;
-  
-  const paramsGenerator = (userIds) => ({
+
+  const paramsGenerator = userIds => ({
     accounts: {
       __args: {
         first: batchSize,
@@ -49,7 +53,7 @@ function lookupAddresses(addresses) {
         }
       }
     }
-  })
+  });
   const batches: string[][] = [];
   for (let i = 0; i < addresses.length; i += batchSize) {
     batches.push(addresses.slice(i, i + batchSize));
@@ -59,8 +63,8 @@ function lookupAddresses(addresses) {
     paramsGenerator,
     batches
   );
-  
-  const isolated = ensSubgraphResponse.then((response) => {
+
+  const isolated = ensSubgraphResponse.then(response => {
     return response?.accounts?.reduce((ensNames, profile) => {
       ensNames[profile.id.toLowerCase()] =
         (profile?.registrations?.[0]?.domain?.labelName &&
