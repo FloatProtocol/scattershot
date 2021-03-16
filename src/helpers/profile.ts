@@ -1,4 +1,4 @@
-import { subgraphRequest } from '@snapshot-labs/snapshot.js/src/utils';
+import { batchSubgraphRequest, subgraphRequest } from '@snapshot-labs/snapshot.js/src/utils';
 
 function get3BoxProfiles(addresses) {
   return new Promise((resolove, reject) => {
@@ -26,42 +26,51 @@ function get3BoxProfiles(addresses) {
 }
 
 function lookupAddresses(addresses) {
-  return new Promise((resolove, reject) => {
-    subgraphRequest('https://api.thegraph.com/subgraphs/name/ensdomains/ens', {
-      accounts: {
+  const ensSubgraphUrl = 'https://api.thegraph.com/subgraphs/name/ensdomains/ens';
+  const batchSize = 1000;
+  
+  const paramsGenerator = (userIds) => ({
+    accounts: {
+      __args: {
+        first: batchSize,
+        where: {
+          id_in: userIds.map(address => address.toLowerCase())
+        }
+      },
+      id: true,
+      registrations: {
         __args: {
-          first: 1000,
-          where: {
-            id_in: addresses.map(addresses => addresses.toLowerCase())
-          }
+          orderBy: 'registrationDate',
+          first: 1
         },
-        id: true,
-        registrations: {
-          __args: {
-            orderBy: 'registrationDate',
-            first: 1
-          },
-          domain: {
-            name: true,
-            labelName: true
-          }
+        domain: {
+          name: true,
+          labelName: true
         }
       }
-    })
-      .then(({ accounts }) => {
-        const ensNames = {};
-        accounts.forEach(profile => {
-          ensNames[profile.id.toLowerCase()] =
-            (profile?.registrations?.[0]?.domain?.labelName &&
-              profile?.registrations?.[0]?.domain?.name) ||
-            '';
-        });
-        resolove(ensNames);
-      })
-      .catch(error => {
-        reject(error);
-      });
+    }
+  })
+  const batches: string[][] = [];
+  for (let i = 0; i < addresses.length; i += batchSize) {
+    batches.push(addresses.slice(i, i + batchSize));
+  }
+  const ensSubgraphResponse = batchSubgraphRequest<string[]>(
+    ensSubgraphUrl,
+    paramsGenerator,
+    batches
+  );
+  
+  const isolated = ensSubgraphResponse.then((response) => {
+    return response?.accounts?.reduce((ensNames, profile) => {
+      ensNames[profile.id.toLowerCase()] =
+        (profile?.registrations?.[0]?.domain?.labelName &&
+          profile?.registrations?.[0]?.domain?.name) ||
+        '';
+      return ensNames;
+    }, {});
   });
+
+  return isolated;
 }
 
 export async function getProfiles(addresses) {
