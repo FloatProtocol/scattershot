@@ -80,6 +80,57 @@ const didVoteFor = (vote: any, choice: number) => {
   return payloadChoice == choice;
 };
 
+interface Spaces {
+  [id: string]: Space;
+}
+
+interface Space {
+  key: string;
+  name: string;
+  network: string;
+  strategies: any[];
+  filters: any;
+  members: any[];
+  skin: string;
+  symbol: string;
+  domain: string;
+}
+
+const augmentSpaces = (spaces: Spaces) => {
+  return {
+    ...spaces,
+    'snapshot.floatprotocol.eth': {
+      ...spaces['snapshot.floatprotocol.eth'],
+      strategies: [
+        {
+          name: 'float-protocol',
+          params: {
+            bank: '0x24a6a37576377f63f194caa5f518a60f45b42921',
+            pools: {
+              daiPhase1Pool: '0xf5ab36def38e2635342e93895fedbd93c8ebb715',
+              usdcPhase1Pool: '0x73139212d0f62c6ddb6514c6a55c3778eb798d72',
+              usdtPhase1Pool: '0x8f2528ee4878c70c82d15903ae9f042a09e9d8f7',
+
+              daiPhase2Pool: '0xAB768db196514DF35722A99c37C8ae3581d6352B',
+              usdcPhase2Pool: '0xeD7df34c629F46de7C31069C7816dD6D8654DD17',
+              usdtPhase2Pool: '0xC6D58F8c684F0F2992bA613d209209897c298E44',
+              slpPhase2Pool: '0xd04F4759A2cc28A5AE33287534CAA4dfcE90B9C3',
+              ethPhase2Pool: '0x5Cc2dB43F9c2E2029AEE159bE60A9ddA50b05D4A',
+              yamPhase2Pool: '0x673B95d277eF022e5eFaF9f167FFDFAB36991738',
+              yfiPhase2Pool: '0x90D1d83FD4CCa873848D728FD8CEf382b1aCB4B8',
+              sushiPhase2Pool: '0xA9e43Ae740A19ddd7Aa04efa4198b32344F4c0f2',
+              wbtcPhase2Pool: '0xE41F9FAbee859C4E6D248E9442c822F09742228a'
+            },
+            uniswapBankEthPair: '0xe965c12b851c30256BDc2F94Ccd9DC4F0A0BC581',
+            sushiswapBankEthPair: '0x938625591adb4e865b882377e2c965f9f9b85e34',
+            sushiPhase2Pool: '0xd04F4759A2cc28A5AE33287534CAA4dfcE90B9C3'
+          }
+        }
+      ]
+    }
+  };
+};
+
 const actions = {
   init: async ({ commit, dispatch }) => {
     const auth = getInstance();
@@ -104,6 +155,7 @@ const actions = {
         formatSpace(space[0], space[1])
       ])
     );
+    spaces = augmentSpaces(spaces);
     commit('SET', { spaces });
     return spaces;
   },
@@ -143,6 +195,7 @@ const actions = {
   },
   getProposals: async ({ commit }, space) => {
     commit('GET_PROPOSALS_REQUEST');
+
     try {
       let proposals: any = await client.request(`${space.key}/proposals`);
       console.log('getProposals.proposals: ', proposals);
@@ -200,18 +253,27 @@ const actions = {
       console.log('getProposal.space: ', space);
 
       console.time('getProposal.scores');
-      const [scores, profiles]: any = await Promise.all([
-        getScores(
-          space.key,
-          space.strategies,
-          space.network,
-          provider,
-          voters,
-          // @ts-ignore
-          blockTag
-        ),
-        getProfiles([proposal.address, ...voters])
-      ]);
+      const [scores, profiles]: any = (
+        await Promise.allSettled([
+          getScores(
+            space.key,
+            space.strategies,
+            space.network,
+            provider,
+            voters,
+            // @ts-ignore
+            blockTag
+          ),
+          getProfiles([proposal.address, ...voters])
+        ])
+      ).map(result => {
+        if (result.status === 'rejected') {
+          console.error(result.reason);
+          return {};
+        }
+        return result.value;
+      });
+
       console.timeEnd('getProposal.scores');
       console.log('Scores', scores);
 
@@ -295,7 +357,7 @@ const actions = {
         )
       };
 
-      console.log(results);
+      console.log('Results: ', results);
 
       commit('GET_PROPOSAL_SUCCESS');
       return { proposal, votes, results };
