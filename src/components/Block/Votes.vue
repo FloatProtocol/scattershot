@@ -20,7 +20,13 @@
       <div
         v-text="
           _shorten(
-            proposal.msg.payload.choices[vote.msg.payload.choice - 1],
+            proposal.msg.payload.choices[
+              (typeof vote.msg.payload.choice === 'number'
+                ? vote.msg.payload.choice
+                : Object.keys(vote.msg.payload.choice).reduce((a, b) =>
+                    obj[a] > obj[b] ? a : b
+                  )) - 1
+            ],
             'choice'
           )
         "
@@ -83,6 +89,24 @@ export default {
         : Object.fromEntries(
             Object.entries(this.sortVotesUserFirst()).slice(0, 10)
           );
+    },
+    primaryChoices() {
+      return this.sortVotesUserFirst().map(vote => {
+        const payloadChoice = vote.msg.payload.choice;
+
+        if (typeof payloadChoice === 'number') return payloadChoice;
+
+        let maxAllocation = 0;
+        let primaryChoice = 1;
+        for (const [choice, allocation] of Object.entries(payloadChoice)) {
+          if (allocation > maxAllocation) {
+            maxAllocation = allocation;
+            primaryChoice = choice;
+          }
+        }
+
+        return primaryChoice;
+      });
     },
     titles() {
       return this.space.strategies.map(strategy => strategy.params.symbol);
