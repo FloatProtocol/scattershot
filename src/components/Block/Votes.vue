@@ -21,11 +21,12 @@
         v-text="
           _shorten(
             proposal.msg.payload.choices[
-              (typeof vote.msg.payload.choice === 'number'
-                ? vote.msg.payload.choice
-                : Object.keys(vote.msg.payload.choice).reduce((a, b) =>
-                    obj[a] > obj[b] ? a : b
-                  )) - 1
+              (typeof vote.msg.payload.choice !== 'number'
+                ? Object.keys(vote.msg.payload.choice).reduce((a, b) =>
+                    vote.msg.payload.choice[a] > vote.msg.payload.choice[b] ? a : b
+                  )
+                : vote.msg.payload.choice
+              ) - 1
             ],
             'choice'
           )
