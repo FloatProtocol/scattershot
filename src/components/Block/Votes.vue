@@ -23,10 +23,11 @@
             proposal.msg.payload.choices[
               (typeof vote.msg.payload.choice !== 'number'
                 ? Object.keys(vote.msg.payload.choice).reduce((a, b) =>
-                    vote.msg.payload.choice[a] > vote.msg.payload.choice[b] ? a : b
+                    vote.msg.payload.choice[a] > vote.msg.payload.choice[b]
+                      ? a
+                      : b
                   )
-                : vote.msg.payload.choice
-              ) - 1
+                : vote.msg.payload.choice) - 1
             ],
             'choice'
           )
