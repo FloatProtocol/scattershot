@@ -51,7 +51,7 @@
       </div>
       <div class="col-6 float-left pl-2">
         <UiButton
-          :disabled="totalScore === 0 || loading"
+          :disabled="loading"
           :loading="loading"
           @click="handleSubmit"
           type="submit"
