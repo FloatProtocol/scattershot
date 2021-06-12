@@ -18,20 +18,7 @@
         class="column"
       />
       <div
-        v-text="
-          _shorten(
-            proposal.msg.payload.choices[
-              (typeof vote.msg.payload.choice !== 'number'
-                ? Object.keys(vote.msg.payload.choice).reduce((a, b) =>
-                    vote.msg.payload.choice[a] > vote.msg.payload.choice[b]
-                      ? a
-                      : b
-                  )
-                : vote.msg.payload.choice) - 1
-            ],
-            'choice'
-          )
-        "
+        v-text="_shorten(visibleChoices[address], 'choice')"
         class="flex-auto text-center text-white"
       />
       <div class="column text-right text-white">
@@ -92,23 +79,32 @@ export default {
             Object.entries(this.sortVotesUserFirst()).slice(0, 10)
           );
     },
-    primaryChoices() {
-      return this.sortVotesUserFirst().map(vote => {
-        const payloadChoice = vote.msg.payload.choice;
+    visibleChoices() {
+      const visibleChoices = {};
+      const nameMapping = this.proposal.msg.payload.choices;
 
-        if (typeof payloadChoice === 'number') return payloadChoice;
+      for (const [address, payload] of Object.entries(this.visibleVotes)) {
+        const payloadChoice = payload.msg.payload.choice;
+        if (typeof payloadChoice !== 'number') {
+          const orderedChoices = Object.keys(payloadChoice)
+            .sort((a, b) => payloadChoice[a] - payloadChoice[b])
+            .filter(key => payloadChoice[key]);
 
-        let maxAllocation = 0;
-        let primaryChoice = 1;
-        for (const [choice, allocation] of Object.entries(payloadChoice)) {
-          if (allocation > maxAllocation) {
-            maxAllocation = allocation;
-            primaryChoice = choice;
-          }
+          visibleChoices[address] = orderedChoices
+            .reduce(
+              (namedChoices, choice) => [
+                ...namedChoices,
+                nameMapping[choice - 1]
+              ],
+              []
+            )
+            .join(' / ');
+        } else {
+          visibleChoices[address] = nameMapping[payloadChoice - 1];
         }
+      }
 
-        return primaryChoice;
-      });
+      return visibleChoices;
     },
     titles() {
       return this.space.strategies.map(strategy => strategy.params.symbol);

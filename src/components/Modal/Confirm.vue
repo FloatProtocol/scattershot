@@ -93,7 +93,7 @@ export default {
       return Object.entries(this.allocations)
         .sort(([, a], [, b]) => b - a)
         .map(([choice]) => this.proposal.msg.payload.choices[choice - 1])
-        .join(' > ');
+        .join(' / ');
     }
   },
   methods: {
