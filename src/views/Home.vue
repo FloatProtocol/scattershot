@@ -69,11 +69,10 @@ import orderBy from 'lodash/orderBy';
 import spotlight from '@snapshot-labs/snapshot-spaces/spaces/spotlight.json';
 import { infiniteScroll } from '@/helpers/utils';
 
-
 const scattershotSpotlight = [
   'snapshot.floatprotocol.eth', // Cheeky I know, but it is good to be bold.
   'idlefinance.eth', // Spotted a bug with displaying vote choices, so a little thank you.
-  ...spotlight,
+  ...spotlight
 ];
 
 export default {
