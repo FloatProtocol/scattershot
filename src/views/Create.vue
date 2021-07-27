@@ -224,6 +224,7 @@ export default {
       this.loading = true;
       this.form.choices = this.choices.map(choice => choice.text);
       this.form.metadata.strategies = this.space.strategies;
+      this.form.type = "weighted";
       try {
         const { ipfsHash } = await this.send({
           space: this.space.key,
